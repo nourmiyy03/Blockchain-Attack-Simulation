@@ -161,14 +161,12 @@ static int publierBlocAttaquant(
 
     if (metrics != NULL) {
         detectionRecordPublished(metrics, 1);
-        detectionRecordAccepted(metrics, 1);
     }
 
     printf("\n[PUBLICATION] L'attaquant publie son bloc secret.");
 
     return 1;
 }
-
 
 // ======================================================
 // SIMULATION SELFISH MINING
@@ -450,6 +448,10 @@ void simulerSelfishMining(DetectionMetrics *metrics) {
 
                     printf("\n[RESULTAT] La branche de l'attaquant gagne.");
 
+                    if (metrics != NULL) {
+                        detectionRecordAccepted(metrics, 1);
+                    }
+
                     printf("\nLe bloc honnete concurrent devient orphelin.");
 
                     enregistrerBlocOrphelin(metrics);
@@ -575,6 +577,15 @@ void simulerSelfishMining(DetectionMetrics *metrics) {
 
             else if (avance >= 2) {
 
+                if (metrics != NULL) {
+                    detectionRecordMined(metrics, 0, 1);
+
+                    detectionRecordPropagation(
+                        metrics,
+                        50 + rand() % 451
+                    );
+                }                
+
                 printf("\n[ADVANTAGE] L'attaquant possede %d blocs d'avance.",
                        avance);
 
@@ -663,7 +674,7 @@ void simulerSelfishMining(DetectionMetrics *metrics) {
             }
 
             blocsPublies++;
-        }
+        }       
 
         copierBlockchain(
             &privateChain,

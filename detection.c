@@ -184,9 +184,8 @@ double detectionAveragePropagation(
 // 4. MOTEUR DE DETECTION RULE-BASED
 // ======================================================
 
-DetectionResult detectionAnalyze(
-    const DetectionMetrics *m
-) {
+
+DetectionResult detectionAnalyze(const DetectionMetrics *m) {
 
     DetectionResult r;
 
@@ -195,88 +194,65 @@ DetectionResult detectionAnalyze(
     strcpy(r.attackType, "Aucune attaque");
     strcpy(r.severity, "Faible");
 
-    r.attackerShare =
-        detectionAttackerShare(m);
+    // ==========================================
+    // 1. CALCUL DES INDICATEURS
+    // ==========================================
 
-    r.orphanRate =
-        detectionOrphanRate(m);
-
-    r.attackerRewardShare =
-        detectionRewardShare(m);
-
-    r.averagePropagationDelay =
-        detectionAveragePropagation(m);
+    r.attackerShare = detectionAttackerShare(m);
+    r.orphanRate = detectionOrphanRate(m);
+    r.attackerRewardShare = detectionRewardShare(m);
+    r.averagePropagationDelay = detectionAveragePropagation(m);
 
 
-    // --------------------------------------------------
-    // REGLE 1 : DOMINATION DE LA PUISSANCE DE MINAGE
-    // --------------------------------------------------
+    // ==========================================
+    // 2. CALCUL DU SCORE DE SUSPICION
+    // ==========================================
 
+    // Règle 1 : proportion élevée de blocs attaquants
     if (r.attackerShare > ATTACKER_SHARE_THRESHOLD) {
         r.score += 2;
     }
 
-
-    // --------------------------------------------------
-    // REGLE 2 : TAUX DE BLOCS ORPHELINS
-    // --------------------------------------------------
-
+    // Règle 2 : taux élevé de blocs orphelins
     if (r.orphanRate >= ORPHAN_RATE_THRESHOLD) {
         r.score += 2;
     }
 
-
-    // --------------------------------------------------
-    // REGLE 3 : RETENTION ET PUBLICATION STRATEGIQUE
-    // --------------------------------------------------
-
-    if (
-        m->attackerWithheldBlocks > 0 ||
-        m->strategicPublications >= 2
-    ) {
+    // Règle 3 : rétention ou publications stratégiques
+    if (m->attackerWithheldBlocks > 0) {
         r.score += 2;
     }
 
+    if (m->strategicPublications >= 2) {
+        r.score += 2;
+    }
 
-    // --------------------------------------------------
-    // REGLE 4 : FORKS ET REORGANISATIONS
-    // --------------------------------------------------
-
+    // Règle 4 : forks
     if (m->forks >= 2) {
         r.score += 1;
     }
 
-    if (m->reorganizations >= 1) {
+    // Règle 5 : réorganisations
+    if (m->reorganizations > 0) {
         r.score += 2;
     }
 
-
-    // --------------------------------------------------
-    // REGLE 5 : INCOHERENCES ET DOUBLE SPENDING
-    // --------------------------------------------------
-
+    // Règle 6 : incohérences de la blockchain
     if (m->chainInconsistencies > 0) {
         r.score += 2;
     }
 
+    // Règle 7 : double spending
     if (m->doubleSpendingEvents > 0) {
-        r.score += 2;
+        r.score += 3;
     }
 
-
-    // --------------------------------------------------
-    // REGLE 6 : COMPORTEMENT DES NOEUDS
-    // --------------------------------------------------
-
+    // Règle 8 : comportement suspect des nœuds
     if (m->suspiciousNodeEvents >= 2) {
         r.score += 1;
     }
 
-
-    // --------------------------------------------------
-    // REGLE 7 : DISTRIBUTION DES RECOMPENSES
-    // --------------------------------------------------
-
+    // Règle 9 : avantage économique de l'attaquant
     if (
         r.attackerRewardShare >
         r.attackerShare + REWARD_ADVANTAGE_THRESHOLD
@@ -284,78 +260,71 @@ DetectionResult detectionAnalyze(
         r.score += 2;
     }
 
-
-    // --------------------------------------------------
-    // REGLE 8 : DELAI DE PROPAGATION
-    // --------------------------------------------------
-
+    // Règle 10 : délai de propagation anormal
     if (
         m->propagationSamples > 0 &&
-        r.averagePropagationDelay >
-        PROPAGATION_DELAY_THRESHOLD
+        r.averagePropagationDelay > PROPAGATION_DELAY_THRESHOLD
     ) {
         r.score += 1;
     }
 
 
-    // ==================================================
-    // CLASSIFICATION
-    // ==================================================
+    // ==========================================
+    // 3. CLASSIFICATION DE L'ATTAQUE
+    // ==========================================
 
-    // 51% Attack
+    // PRIORITÉ 1 : ATTAQUE 51 %
+
     if (
         m->reorganizations > 0 &&
         (
             m->doubleSpendingEvents > 0 ||
             (
-                r.attackerShare >
-                ATTACKER_SHARE_THRESHOLD
-                &&
+                r.attackerShare > ATTACKER_SHARE_THRESHOLD &&
                 m->chainInconsistencies > 0
             )
         )
     ) {
 
         r.attackDetected = 1;
-
         strcpy(r.attackType, "51% Attack");
     }
 
 
-    // Selfish Mining
+    // PRIORITÉ 2 : SELFISH MINING
+
     else if (
-        m->attackerWithheldBlocks > 0 ||
         (
-            m->strategicPublications >= 2 &&
-            m->forks > 0 &&
-            r.orphanRate >= ORPHAN_RATE_THRESHOLD
-        )
+            m->attackerWithheldBlocks > 0 ||
+            m->strategicPublications >= 2
+        ) &&
+        m->forks > 0 &&
+        r.orphanRate >= ORPHAN_RATE_THRESHOLD
     ) {
 
         r.attackDetected = 1;
-
         strcpy(r.attackType, "Selfish Mining");
     }
 
 
-    // Suspicious behavior
-    else if (r.score >= 4) {
+    // PRIORITÉ 3 : COMPORTEMENT SUSPECT
+
+    else if (r.score >= 5) {
 
         r.attackDetected = 1;
-
         strcpy(r.attackType, "Comportement suspect");
     }
 
 
-    // ==================================================
-    // NIVEAU DE RISQUE
-    // ==================================================
+    // ==========================================
+    // 4. NIVEAU DE GRAVITÉ
+    // ==========================================
 
-    if (r.score >= 8) {
+    if (r.score >= 9) {
 
         strcpy(r.severity, "Critique");
 
-    } else if (r.score >= 5) {
+    } else if (r.score >= 6) {
 
         strcpy(r.severity, "Eleve");
 
@@ -368,10 +337,8 @@ DetectionResult detectionAnalyze(
         strcpy(r.severity, "Faible");
     }
 
-
     return r;
 }
-
 
 // ======================================================
 // 5. AFFICHAGE DES METRIQUES
