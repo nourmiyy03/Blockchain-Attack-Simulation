@@ -139,9 +139,7 @@ void ajouterBlocPoS(
 
 
 // Vérifier une blockchain
-int verifierBlockchain(
-    const Blockchain *chain
-);
+int verifierBlockchain(Blockchain *chain);
 
 
 // Afficher une blockchain
@@ -168,10 +166,5 @@ void copierBloc(
     const Block *source
 );
 
-
-void simulerAttaque51(void);
-
-// Selfish Mining
-void simulerSelfishMining(void);
 
 #endif

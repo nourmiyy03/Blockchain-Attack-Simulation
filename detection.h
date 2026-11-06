@@ -139,4 +139,7 @@ void detectionDisplayResult(
     const DetectionResult *r
 );
 
+void simulerAttaque51(DetectionMetrics *metrics);
+void simulerSelfishMining(DetectionMetrics *metrics);
+
 #endif
