@@ -6,10 +6,14 @@
 </p>
 
 <p align="center">
-  ![Language](https://img.shields.io/badge/Language-C-A8B9CC?style=for-the-badge&logo=c&logoColor=white)
-  ![Consensus](https://img.shields.io/badge/Consensus-Proof%20of%20Work-orange?style=for-the-badge)
-  ![Cryptography](https://img.shields.io/badge/Hashing-SHA--256-blue?style=for-the-badge)
-  ![Status](https://img.shields.io/badge/Status-Educational%20Project-purple?style=for-the-badge)
+  <img src="https://img.shields.io/badge/Language-C-A8B9CC?style=for-the-badge&logo=c&logoColor=white" alt="C">
+  <img src="https://img.shields.io/badge/PoW-Proof%20of%20Work-orange?style=for-the-badge" alt="Proof of Work">
+  <img src="https://img.shields.io/badge/PoS-Proof%20of%20Stake-blue?style=for-the-badge" alt="Proof of Stake">
+  <img src="https://img.shields.io/badge/Merkle%20Tree-SHA--256-green?style=for-the-badge" alt="Merkle Tree">
+  <img src="https://img.shields.io/badge/Security-51%25%20Attack-red?style=for-the-badge" alt="51% Attack">
+  <img src="https://img.shields.io/badge/Security-Selfish%20Mining-purple?style=for-the-badge" alt="Selfish Mining">
+  <img src="https://img.shields.io/badge/Detection-Rule--Based-yellow?style=for-the-badge" alt="Attack Detection">
+  <img src="https://img.shields.io/badge/Status-Educational%20Project-lightgrey?style=for-the-badge" alt="Educational Project">
 </p>
 
 ---
