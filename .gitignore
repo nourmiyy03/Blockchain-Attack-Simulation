@@ -1,0 +1,13 @@
+# Executables
+*.exe
+*.out
+blockchain
+
+# Object files
+*.o
+
+# VS Code
+.vscode/
+
+# Temporary files
+*.tmp
